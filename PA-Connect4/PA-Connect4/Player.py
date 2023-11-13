@@ -32,6 +32,21 @@ class AIPlayer:
         if self.type == 'mcts' and param:
             self.max_iterations = int(param)
 
+
+    def maxvalue(self, board, alpha, beta):
+        if (is_winning_state(board, self.player_number)):
+            return 1000, null
+        if (is_winning_state(board, self.other_player_number)):
+            return -1000, null
+        value = -1000
+        for move in get_valid_moves(board):
+            # We are here right now
+        return value, move
+
+    def minvalue(self, board, alpha, beta):
+        return
+
+
     def get_alpha_beta_move(self, board):
         """
         Given the current state of the board, return the next move based on
@@ -53,11 +68,9 @@ class AIPlayer:
         The 0 based index of the column that represents the next move
         """
         moves = get_valid_moves(board)
-        best_move = np.random.choice(moves)
+        value, move = maxvalue(board, -1000, 1000)
 
-        #YOUR ALPHA-BETA CODE GOES HERE
-
-        return best_move
+        return move
 
 
     def get_mcts_move(self, board):
@@ -133,9 +146,24 @@ class AIPlayer:
         The utility value for the current board
         """
 
-        #YOUR EVALUATION FUNCTION GOES HERE
+        # This utility function will return an integer that is the number
+        # of used spaces that are directly touching another one of my used spaces
+        myValue = 0
+        for i in range(0, len(board) - 1):
+            for j in range (0, len(board[i]) - 1):
+                if (board[i+1][j] == self.player_number and board[i][j] == self.player_number):
+                    myValue = myValue + 1
+                if (board[i][j+1] == self.player_number and board[i][j] == self.player_number):
+                    myValue = myValue + 1
 
-        return 0
+        for i in range(0, len(board) - 1):
+            for j in range (0, len(board[i]) - 1):
+                if (board[i+1][j] == self.other_player_number and board[i][j] == self.other_player_number):
+                    myValue = myValue - 1
+                if (board[i][j+1] == self.other_player_number and board[i][j] == self.other_player_number):
+                    myValue = myValue - 1
+
+        return myValue
 
 
 class RandomPlayer:
@@ -313,6 +341,7 @@ class MCTSNode:
 
 
     def simulate(self):
+        return
         #This function will simulate a random game from this node's state and then call back on its 
         #parent with the result
 
