@@ -15,7 +15,7 @@ class AIPlayer:
 
         #Parameters for the different agents
         
-        self.depth_limit = 3 #default depth-limit - change if you desire
+        self.depth_limit = 4 #default depth-limit - change if you desire
         #Alpha-beta
         # Example of using command line param to overwrite depth limit
         if self.type == 'ab' and param:
@@ -33,41 +33,51 @@ class AIPlayer:
             self.max_iterations = int(param)
 
 
-    def maxvalue(self, board, alpha, beta):
+    def maxvalue(self, board, alpha, beta, depth):
+        depth = depth + 1
         if (is_winning_state(board, self.player_number)):
             return 1000, None
         if (is_winning_state(board, self.other_player_number)):
             return -1000, None
         v = -1000
+        move = None  # Initialize move here
+        if (depth == self.depth_limit):
+            return self.evaluation_function(board), None
 
         for a in get_valid_moves(board):
             # game.Result(state, a) in the pseudocode is boardcopy after make_move
             boardcopy = np.copy(board)
             make_move(boardcopy, a, self.player_number)
-            v2, a2 = self.minvalue(boardcopy, alpha, beta)
+            v2, a2 = self.minvalue(boardcopy, alpha, beta, depth)
 
             if (v2 > v):
                 v, move = v2, a
                 alpha = max(alpha, v)
+                print("I happened in max\n")
             if (v >= beta):
                 return v, move
         return v, move
 
-    def minvalue(self, board, alpha, beta):
+    def minvalue(self, board, alpha, beta, depth):
+        depth = depth + 1
         if (is_winning_state(board, self.player_number)):
             return 1000, None
         if (is_winning_state(board, self.other_player_number)):
             return -1000, None
         v = 1000
-
+        move = None  # Initialize move here
+        if (depth == self.depth_limit):
+            return self.evaluation_function(board), None
+        
         for a in get_valid_moves(board):
             boardcopy = np.copy(board)
             make_move(boardcopy, a, self.player_number)
-            v2, a2 = self.maxvalue(boardcopy, alpha, beta)
+            v2, a2 = self.maxvalue(boardcopy, alpha, beta, depth)
 
             if (v2 < v):
                 v, move = v2, a
                 beta = min(beta, v)
+                print("I happened in min\n")
             if (v <= alpha):
                 return v, move
         return v, move
@@ -93,9 +103,8 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        moves = get_valid_moves(board)
-        value, move = self.maxvalue(board, -1000, 1000)
-
+        value, move = self.maxvalue(board, -1000, 1000, 0)
+        print("Me again\n")
         return move
 
 
@@ -175,18 +184,26 @@ class AIPlayer:
         # This utility function will return an integer that is the number
         # of used spaces that are directly touching another one of my used spaces
         myValue = 0
-        for i in range(0, len(board) - 1):
-            for j in range (0, len(board[i]) - 1):
+        for i in range(1, len(board) - 1):
+            for j in range (1, len(board[i]) - 1):
                 if (board[i+1][j] == self.player_number and board[i][j] == self.player_number):
                     myValue = myValue + 1
                 if (board[i][j+1] == self.player_number and board[i][j] == self.player_number):
                     myValue = myValue + 1
+                if (board[i-1][j] == self.player_number and board[i][j] == self.player_number):
+                    myValue = myValue + 1
+                if (board[i][j-1] == self.player_number and board[i][j] == self.player_number):
+                    myValue = myValue + 1
 
-        for i in range(0, len(board) - 1):
-            for j in range (0, len(board[i]) - 1):
+        for i in range(1, len(board) - 1):
+            for j in range (1, len(board[i]) - 1):
                 if (board[i+1][j] == self.other_player_number and board[i][j] == self.other_player_number):
                     myValue = myValue - 1
                 if (board[i][j+1] == self.other_player_number and board[i][j] == self.other_player_number):
+                    myValue = myValue - 1
+                if (board[i-1][j] == self.player_number and board[i][j] == self.player_number):
+                    myValue = myValue - 1
+                if (board[i][j-1] == self.player_number and board[i][j] == self.player_number):
                     myValue = myValue - 1
 
         return myValue
@@ -293,7 +310,7 @@ class MCTSNode:
     def print_tree(self):
         #Debugging utility that will print the whole subtree starting at this node
         print("****")
-        print_node(self)
+        self.print_node(self)
         for m in self.moves:
             if self.children[m]:
                 self.children[m].print_tree()
@@ -446,14 +463,14 @@ def is_winning_state(board, player_num):
         for op in [None, np.fliplr]:
             op_board = op(b) if op else b
             
-            root_diag = np.diagonal(op_board, offset=0).astype(np.int)
+            root_diag = np.diagonal(op_board, offset=0).astype(int)
             if player_win_str in to_str(root_diag):
                 return True
 
             for i in range(1, b.shape[1]-3):
                 for offset in [i, -i]:
                     diag = np.diagonal(op_board, offset=offset)
-                    diag = to_str(diag.astype(np.int))
+                    diag = to_str(diag.astype(int))
                     if player_win_str in diag:
                         return True
 
