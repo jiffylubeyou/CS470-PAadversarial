@@ -35,16 +35,42 @@ class AIPlayer:
 
     def maxvalue(self, board, alpha, beta):
         if (is_winning_state(board, self.player_number)):
-            return 1000, null
+            return 1000, None
         if (is_winning_state(board, self.other_player_number)):
-            return -1000, null
-        value = -1000
-        for move in get_valid_moves(board):
-            # We are here right now
-        return value, move
+            return -1000, None
+        v = -1000
+
+        for a in get_valid_moves(board):
+            # game.Result(state, a) in the pseudocode is boardcopy after make_move
+            boardcopy = np.copy(board)
+            make_move(boardcopy, a, self.player_number)
+            v2, a2 = self.minvalue(boardcopy, alpha, beta)
+
+            if (v2 > v):
+                v, move = v2, a
+                alpha = max(alpha, v)
+            if (v >= beta):
+                return v, move
+        return v, move
 
     def minvalue(self, board, alpha, beta):
-        return
+        if (is_winning_state(board, self.player_number)):
+            return 1000, None
+        if (is_winning_state(board, self.other_player_number)):
+            return -1000, None
+        v = 1000
+
+        for a in get_valid_moves(board):
+            boardcopy = np.copy(board)
+            make_move(boardcopy, a, self.player_number)
+            v2, a2 = self.maxvalue(boardcopy, alpha, beta)
+
+            if (v2 < v):
+                v, move = v2, a
+                beta = min(beta, v)
+            if (v <= alpha):
+                return v, move
+        return v, move
 
 
     def get_alpha_beta_move(self, board):
@@ -68,7 +94,7 @@ class AIPlayer:
         The 0 based index of the column that represents the next move
         """
         moves = get_valid_moves(board)
-        value, move = maxvalue(board, -1000, 1000)
+        value, move = self.maxvalue(board, -1000, 1000)
 
         return move
 
