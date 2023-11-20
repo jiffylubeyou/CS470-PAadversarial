@@ -133,6 +133,52 @@ class AIPlayer:
         print('MCTS chooses action', root.max_child())
         return root.max_child()
 
+    def expectimaxvalue(self, board, depth):
+        depth = depth + 1
+        if (is_winning_state(board, self.player_number)):
+            return 10001 - depth, None
+        if (is_winning_state(board, self.other_player_number)):
+            return -10001 - depth, None
+        v = -1000
+        move = None  # Initialize move here
+        if (depth == self.depth_limit):
+            return self.evaluation_function(board), None
+
+        for a in get_valid_moves(board):
+            # game.Result(state, a) in the pseudocode is boardcopy after make_move
+            boardcopy = np.copy(board)
+            make_move(boardcopy, a, self.player_number)
+            v2, a2 = self.expectiminvalue(boardcopy, depth)
+            if (depth == 1):
+                print("Value of move ", a," = ", v2)
+
+            if (v2 > v):
+                v, move = v2, a
+                # print("I happened in max\n")
+        return v, move
+    
+    def expectiminvalue(self, board, depth):
+        depth = depth + 1
+        if (is_winning_state(board, self.player_number)):
+            return 10001 - depth, None
+        if (is_winning_state(board, self.other_player_number)):
+            return -10001 - depth, None
+        
+        move = None  # Initialize move here
+        if (depth == self.depth_limit):
+            return self.evaluation_function(board), None
+        
+        values = 0
+        movesum = len(get_valid_moves(board))
+        for a in get_valid_moves(board):
+            boardcopy = np.copy(board)
+            make_move(boardcopy, a, self.player_number)
+            v2, a2 = self.expectimaxvalue(boardcopy, depth)
+            values = values + v2
+
+        valuesaverage = values / movesum
+        return valuesaverage, move
+
     def get_expectimax_move(self, board):
         """
         Given the current state of the board, return the next move based on
@@ -154,12 +200,11 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        moves = get_valid_moves(board)
-        best_move = np.random.choice(moves)
+        # 0 is setting the initial depth to 0 which later compares the to the self.depth_limit
+        value, move = self.expectimaxvalue(board, 0)
         
-        #YOUR EXPECTIMAX CODE GOES HERE
 
-        return best_move
+        return move
 
 
     def evaluation_function(self, board):
@@ -201,9 +246,9 @@ class AIPlayer:
                     myValue = myValue - 1
                 if (board[i][j+1] == self.other_player_number and board[i][j] == self.other_player_number):
                     myValue = myValue - 1
-                if (board[i-1][j] == self.player_number and board[i][j] == self.player_number):
+                if (board[i-1][j] == self.other_player_number and board[i][j] == self.other_player_number):
                     myValue = myValue - 1
-                if (board[i][j-1] == self.player_number and board[i][j] == self.player_number):
+                if (board[i][j-1] == self.other_player_number and board[i][j] == self.other_player_number):
                     myValue = myValue - 1
 
         return myValue
