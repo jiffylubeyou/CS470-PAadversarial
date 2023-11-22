@@ -36,9 +36,9 @@ class AIPlayer:
     def maxvalue(self, board, alpha, beta, depth):
         depth = depth + 1
         if (is_winning_state(board, self.player_number)):
-            return 1000, None
+            return 100001 - depth, None
         if (is_winning_state(board, self.other_player_number)):
-            return -1000, None
+            return -100001 + depth, None
         v = -1000
         move = None  # Initialize move here
         if (depth == self.depth_limit):
@@ -61,9 +61,9 @@ class AIPlayer:
     def minvalue(self, board, alpha, beta, depth):
         depth = depth + 1
         if (is_winning_state(board, self.player_number)):
-            return 1000, None
+            return 100001 - depth, None
         if (is_winning_state(board, self.other_player_number)):
-            return -1000, None
+            return -100001 + depth, None
         v = 1000
         move = None  # Initialize move here
         if (depth == self.depth_limit):
@@ -136,9 +136,9 @@ class AIPlayer:
     def expectimaxvalue(self, board, depth):
         depth = depth + 1
         if (is_winning_state(board, self.player_number)):
-            return 10001 - depth, None
+            return 100001 - depth, None
         if (is_winning_state(board, self.other_player_number)):
-            return -10001 - depth, None
+            return -100001 + depth, None
         v = -1000
         move = None  # Initialize move here
         if (depth == self.depth_limit):
@@ -160,9 +160,9 @@ class AIPlayer:
     def expectiminvalue(self, board, depth):
         depth = depth + 1
         if (is_winning_state(board, self.player_number)):
-            return 10001 - depth, None
+            return 100001 - depth, None
         if (is_winning_state(board, self.other_player_number)):
-            return -10001 - depth, None
+            return -100001 + depth, None
         
         move = None  # Initialize move here
         if (depth == self.depth_limit):
